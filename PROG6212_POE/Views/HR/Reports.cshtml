@@ -1,0 +1,507 @@
+﻿@model List<PROG6212_POE.Models.Claim>
+
+@{
+    ViewData["Title"] = "Claims Reports";
+    var totalAmount = Model.Sum(c => c.totalAmount);
+    var approvedClaims = Model.Where(c => c.claimStatus == "Approved").ToList();
+    var pendingClaims = Model.Where(c => c.claimStatus == "Pending").ToList();
+    var rejectedClaims = Model.Where(c => c.claimStatus == "Rejected").ToList();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claims Reports</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #5DA29A 0%, #A25D65 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #5DA29A;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #5DA29A, #A25D65);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #5DA29A, #A25D65);
+            color: white;
+            box-shadow: 0 4px 15px rgba(93, 162, 154, 0.4);
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(93, 162, 154, 0.6);
+            }
+
+        .btn-secondary {
+            background: white;
+            color: #5DA29A;
+            border: 2px solid #5DA29A;
+        }
+
+            .btn-secondary:hover {
+                background: #5DA29A;
+                color: white;
+            }
+
+        .content-header {
+            background: linear-gradient(135deg, #5DA29A, #A25D65);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(93, 162, 154, 0.3);
+        }
+
+            .content-header h1 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+            border-top: 4px solid #5DA29A;
+        }
+
+            .summary-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+                border-top-color: #A25D65;
+            }
+
+            .summary-card h6 {
+                color: #666;
+                margin-bottom: 10px;
+            }
+
+            .summary-card h3 {
+                font-size: 1.8rem;
+                font-weight: bold;
+            }
+
+        .text-primary {
+            color: #5DA29A;
+        }
+
+        .text-success {
+            color: #28a745;
+        }
+
+        .text-warning {
+            color: #ffc107;
+        }
+
+        .text-danger {
+            color: #dc3545;
+        }
+
+        .financial-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .claims-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .claims-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+            .claims-table thead {
+                background: linear-gradient(135deg, #5DA29A, #A25D65);
+                color: white;
+            }
+
+            .claims-table th,
+            .claims-table td {
+                padding: 15px;
+                text-align: left;
+                border-bottom: 1px solid #eee;
+            }
+
+            .claims-table th {
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }
+
+            .claims-table tbody tr {
+                transition: all 0.3s ease;
+            }
+
+                .claims-table tbody tr:hover {
+                    background: rgba(93, 162, 154, 0.05);
+                    transform: scale(1.01);
+                }
+
+                .claims-table tbody tr.hidden {
+                    display: none;
+                }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+            .filter-section h5 {
+                color: #5DA29A;
+                margin-bottom: 15px;
+            }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #5DA29A;
+            background: white;
+            color: #5DA29A;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            .filter-btn:hover {
+                background: #5DA29A;
+                color: white;
+            }
+
+        fadeInUp {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        (max-width: 768px) {
+            .container
+
+        {
+            margin: 10px;
+            padding: 15px;
+        }
+
+        .header-bar {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nav-actions {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .claims-table {
+            font-size: 0.9rem;
+        }
+
+            .claims-table th,
+            .claims-table td {
+                padding: 10px;
+            }
+
+        }
+
+        print {
+            body
+
+        {
+            background: white;
+        }
+
+        .btn, .filter-section, .header-bar {
+            display: none !important;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header-bar">
+            <div class="logo">Claims Reports</div>
+            <div class="nav-actions">
+                @* <button onclick="window.print()" class="btn btn-primary">
+                    🖨️ Print Report
+                </button> *@
+                <a href="@Url.Action("Index", "HR")" class="btn btn-secondary">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </header>
+
+        <div class="content-header">
+            <h1>Claims Reports & Analytics</h1>
+            <p>Comprehensive overview of all claims in the system</p>
+        </div>
+
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h6>Total Claims</h6>
+                <h3 class="text-primary">@Model.Count</h3>
+            </div>
+            <div class="summary-card">
+                <h6>Approved</h6>
+                <h3 class="text-success">@approvedClaims.Count</h3>
+            </div>
+            <div class="summary-card">
+                <h6>Pending</h6>
+                <h3 class="text-warning">@pendingClaims.Count</h3>
+            </div>
+            <div class="summary-card">
+                <h6>Rejected</h6>
+                <h3 class="text-danger">@rejectedClaims.Count</h3>
+            </div>
+        </div>
+
+        <div class="financial-cards">
+            <div class="summary-card">
+                <h6>Total Amount (All Claims)</h6>
+                <h3 class="text-primary">R @totalAmount.ToString("N2")</h3>
+            </div>
+            <div class="summary-card">
+                <h6>Approved Amount</h6>
+                <h3 class="text-success">R @approvedClaims.Sum(c => c.totalAmount).ToString("N2")</h3>
+            </div>
+            <div class="summary-card">
+                <h6>Pending Amount</h6>
+                <h3 class="text-warning">R @pendingClaims.Sum(c => c.totalAmount).ToString("N2")</h3>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <h5>Quick Filters</h5>
+            <div class="filter-buttons">
+                <button class="filter-btn" onclick="filterTable('All')">
+                    📋 Show All (@Model.Count)
+                </button>
+                <button class="filter-btn" onclick="filterTable('Approved')">
+                    ✅ Approved (@approvedClaims.Count)
+                </button>
+                <button class="filter-btn" onclick="filterTable('Pending')">
+                    ⏳ Pending (@pendingClaims.Count)
+                </button>
+                <button class="filter-btn" onclick="filterTable('Rejected')">
+                    ❌ Rejected (@rejectedClaims.Count)
+                </button>
+            </div>
+        </div>
+
+        <section class="claims-section">
+            <h3 style="color: #5DA29A; margin-bottom: 20px;" id="section-title">All Claims</h3>
+            <div style="overflow-x: auto;">
+                <table class="claims-table">
+                    <thead>
+                        <tr>
+                            <th>Claim ID</th>
+                            <th>Lecturer</th>
+                            <th>Date</th>
+                            <th>Hours</th>
+                            <th>Rate</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var claim in Model.OrderByDescending(c => c.dateOfClaim))
+                            {
+                                <tr data-status="@claim.claimStatus">
+                                    <td>@claim.claimId</td>
+                                    <td>@claim.theUser.Name @claim.theUser.Surname</td>
+                                    <td>@claim.dateOfClaim.ToString("dd MMM yyyy")</td>
+                                    <td>@claim.hoursWorked hrs</td>
+                                    <td>R @claim.hourlyRate</td>
+                                    <td><strong>R @claim.totalAmount.ToString("N2")</strong></td>
+                                    <td>
+                                        <span class="status-badge status-@claim.claimStatus.ToLower()">
+                                            @claim.claimStatus
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (claim.claimStatus == "Approved")
+                                        {
+                                            <a href="@Url.Action("GenerateInvoice", "HR", new { id = claim.claimId })" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.9rem;">
+                                                🧾 Invoice
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 40px; color: #666;">
+                                    No claims found in the system
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div id="no-results-message" style="display: none; text-align: center; padding: 40px; color: #666;">
+                <h3>No Claims Found</h3>
+                <p>No claims match the selected filter.</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function filterTable(status) {
+            const rows = document.querySelectorAll('.claims-table tbody tr');
+            const sectionTitle = document.getElementById('section-title');
+            const noResultsMessage = document.getElementById('no-results-message');
+            const table = document.querySelector('.claims-table');
+            let visibleCount = 0;
+
+            // Update section title
+            sectionTitle.textContent = status === 'All' ? 'All Claims' : status + ' Claims';
+
+            rows.forEach(row => {
+                const rowStatus = row.getAttribute('data-status');
+
+                if (status === 'All' || rowStatus === status) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            // Show/hide "no results" message
+            if (visibleCount === 0) {
+                if (table) table.style.display = 'none';
+                if (noResultsMessage) noResultsMessage.style.display = 'block';
+            } else {
+                if (table) table.style.display = 'table';
+                if (noResultsMessage) noResultsMessage.style.display = 'none';
+            }
+        }
+
+        // Table row click effect
+        document.querySelectorAll('.claims-table tbody tr').forEach(row => {
+            row.addEventListener('click', function(e) {
+                if (!e.target.closest('a')) {
+                    this.style.background = 'rgba(93, 162, 154, 0.1)';
+                    setTimeout(() => {
+                        this.style.background = '';
+                    }, 200);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

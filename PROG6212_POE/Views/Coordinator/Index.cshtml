@@ -1,0 +1,308 @@
+﻿@model IEnumerable<PROG6212_POE.Models.Claim>
+
+@{
+    ViewData["Title"] = "Claims Management";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claims Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .bg-primary {
+            background: linear-gradient(135deg, #5AA587 50%, #A55A78 50%) !important;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #5AA587 0%, #A55A78 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #5AA587;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #5AA587, #A55A78);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logout-btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .logout-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+            }
+
+        .content-header {
+            background: linear-gradient(135deg, #5AA587, #A55A78);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(90, 165, 135, 0.3);
+        }
+
+            .content-header h1 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }
+
+        .claims-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 0.6s ease-out;
+            overflow-x: auto;
+        }
+
+        .claims-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+            .claims-table thead {
+                background: linear-gradient(135deg, #5AA587, #A55A78);
+                color: white;
+            }
+
+            .claims-table th,
+            .claims-table td {
+                padding: 15px;
+                text-align: left;
+                border-bottom: 1px solid #eee;
+            }
+
+            .claims-table th {
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }
+
+            .claims-table tbody tr {
+                transition: all 0.3s ease;
+            }
+
+                .claims-table tbody tr:hover {
+                    background: rgba(90, 165, 135, 0.05);
+                    transform: scale(1.01);
+                }
+
+        .action-links a {
+            color: #5AA587;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            background: rgba(90, 165, 135, 0.1);
+        }
+
+            .action-links a:hover {
+                background: #5AA587;
+                color: white;
+                transform: translateY(-2px);
+            }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .user-badge {
+            padding: 4px 10px;
+            background: linear-gradient(135deg, #5AA587, #A55A78);
+            color: white;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        fadeInUp {
+            from
+
+        {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        }
+
+        (max-width: 768px) {
+            .container
+
+        {
+            margin: 10px;
+            padding: 15px;
+        }
+
+        .claims-table {
+            font-size: 0.9rem;
+        }
+
+            .claims-table th,
+            .claims-table td {
+                padding: 10px;
+            }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header-bar">
+            <div class="logo">Claims Management System - Coordinator</div>
+            <div>
+                <span style="margin-right: 15px; color: #5AA587; font-weight: 600;">Welcome, @ViewBag.UserName</span>
+                <a asp-controller="Account" asp-action="Logout" class="logout-btn">Logout</a>
+            </div>
+        </header>
+
+        <div class="content-header">
+            <h1>All Claims</h1>
+            <p>View and manage all submitted claims</p>
+            <p>First Approval Process - Review and approve/reject claims</p>
+        </div>
+
+        <section class="claims-section">
+            <table class="claims-table">
+                <thead>
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Submitted By</th>
+                        <th>Hourly Rate</th>
+                        <th>Hours Worked</th>
+                        <th>Total Amount</th>
+                        <th>Notes</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var statusClass = item.claimStatus?.ToLower() switch
+                            {
+                                "pending" => "status-pending",
+                                "approved" => "status-approved",
+                                "rejected" => "status-rejected",
+                                _ => "status-pending"
+                            };
+
+                            <tr>
+                                <td>CLM-@item.claimId.ToString("D4")</td>
+                                <td>
+                                    <span class="user-badge">
+                                        @(item.theUser?.Name ?? "Unknown") @(item.theUser?.Surname ?? "")
+                                    </span>
+                                </td>
+                                <td>R @item.hourlyRate.ToString("N2")</td>
+                                <td>@item.hoursWorked</td>
+                                <td><strong>R @item.totalAmount.ToString("N2")</strong></td>
+                                <td>@(item.claimNotes?.Length > 50 ? item.claimNotes.Substring(0, 50) + "..." : item.claimNotes)</td>
+                                <td><span class="status-badge @statusClass">@(item.claimStatus ?? "Pending")</span></td>
+                                <td>@item.dateOfClaim.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <div class="action-links">
+                                        <a href="@Url.Action("Read", "Coordinator", new { id = item.claimId })">Details</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9">
+                                <div style="text-align: center; padding: 40px 20px; color: #666;">
+                                    <h3>No Claims Found</h3>
+                                    <p>No claims have been submitted by lecturers yet</p>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+        // Table row click effect
+        document.querySelectorAll('.claims-table tbody tr').forEach(row => {
+            row.addEventListener('click', function() {
+                this.style.background = 'rgba(90, 165, 135, 0.1)';
+                setTimeout(() => {
+                    this.style.background = '';
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html>
